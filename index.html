@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sapataria Pro</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f5f6f8;color:#20242a}
+button,input,select{font:inherit}.hidden{display:none!important}
+.login{min-height:100vh;display:grid;place-items:center;background:linear-gradient(135deg,#17191d,#343840)}
+.login-card{width:min(420px,92%);background:#fff;border-radius:20px;padding:34px;box-shadow:0 20px 60px #0005}
+.logo{font-size:28px;font-weight:800;margin-bottom:8px}.muted{color:#6d737d}
+.field{margin:16px 0}.field label{display:block;font-weight:700;margin-bottom:7px}.field input,.field select{width:100%;padding:12px;border:1px solid #d7dbe0;border-radius:10px;outline:none}.field input:focus,.field select:focus{border-color:#222}
+.btn{border:0;border-radius:10px;padding:12px 16px;cursor:pointer;font-weight:700}.primary{background:#20242a;color:#fff}.secondary{background:#e9ebee;color:#20242a}.danger{background:#ffe5e5;color:#a40000}
+.error{color:#b00020;font-size:14px;margin-top:10px}
+.app{display:flex;min-height:100vh}.sidebar{width:240px;background:#191c20;color:#fff;padding:24px 14px;position:fixed;inset:0 auto 0 0}.brand{font-size:23px;font-weight:800;padding:8px 12px 24px}.nav button{display:block;width:100%;text-align:left;background:transparent;color:#cfd3d8;border:0;padding:13px 12px;border-radius:9px;margin:4px 0;cursor:pointer}.nav button.active,.nav button:hover{background:#30343a;color:#fff}.logout{position:absolute;bottom:20px;left:14px;right:14px}
+.main{margin-left:240px;width:calc(100% - 240px);padding:28px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}.top h1{margin:0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 3px 15px #0000000a}.stat{font-size:28px;font-weight:800;margin-top:8px}.section{display:none}.section.active{display:block}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.toolbar input,.toolbar select{padding:11px;border:1px solid #d7dbe0;border-radius:9px}.table-wrap{background:#fff;border-radius:14px;overflow:auto;box-shadow:0 3px 15px #0000000a}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:14px;border-bottom:1px solid #eee}th{font-size:13px;color:#6d737d}.modal{position:fixed;inset:0;background:#0007;display:grid;place-items:center;padding:20px}.modal-card{background:#fff;width:min(520px,100%);border-radius:16px;padding:25px}.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}.empty{text-align:center;color:#777;padding:35px}
+@media(max-width:800px){.sidebar{width:70px;padding:15px 8px}.brand{font-size:0}.brand:after{content:'SP';font-size:20px}.nav button{font-size:0;text-align:center}.nav button:before{content:'•';font-size:24px}.main{margin-left:70px;width:calc(100% - 70px);padding:18px}.grid{grid-template-columns:repeat(2,1fr)}.top{gap:10px}.top h1{font-size:23px}}
+</style>
+</head>
+<body>
+<div id="login" class="login">
+  <div class="login-card">
+    <div class="logo">Sapataria Pro</div>
+    <div class="muted">Gestão simples para sua sapataria</div>
+    <div class="field"><label>Usuário</label><input id="user" value="admin" placeholder="Digite o usuário"></div>
+    <div class="field"><label>Senha</label><input id="pass" type="password" value="1234" placeholder="Digite a senha"></div>
+    <button class="btn primary" style="width:100%" onclick="login()">Entrar</button>
+    <div id="loginError" class="error"></div>
+    <p class="muted" style="font-size:13px;margin-top:18px">Teste: admin / 1234</p>
+  </div>
+</div>
+
+<div id="app" class="app hidden">
+<aside class="sidebar">
+  <div class="brand">Sapataria Pro</div>
+  <div class="nav">
+    <button data-page="dashboard" onclick="showPage('dashboard')">Dashboard</button>
+    <button data-page="clientes" onclick="showPage('clientes')">Clientes</button>
+    <button data-page="produtos" onclick="showPage('produtos')">Produtos</button>
+    <button data-page="servicos" onclick="showPage('servicos')">Serviços</button>
+    <button data-page="caixa" onclick="showPage('caixa')">Caixa</button>
+  </div>
+  <button class="btn secondary logout" onclick="logout()">Sair</button>
+</aside>
+
+<main class="main">
+<section id="dashboard" class="section active">
+<div class="top"><h1>Dashboard</h1><button class="btn primary" onclick="openModal('mov')">+ Movimento</button></div>
+<div class="grid">
+<div class="card"><div class="muted">Clientes</div><div class="stat" id="sClientes">0</div></div>
+<div class="card"><div class="muted">Produtos</div><div class="stat" id="sProdutos">0</div></div>
+<div class="card"><div class="muted">Serviços</div><div class="stat" id="sServicos">0</div></div>
+<div class="card"><div class="muted">Saldo do caixa</div><div class="stat" id="sSaldo">R$ 0,00</div></div>
+</div>
+<div class="card" style="margin-top:18px"><h3>Bem-vindo</h3><p class="muted">Cadastre clientes, produtos e serviços e acompanhe o caixa do dia.</p></div>
+</section>
+
+<section id="clientes" class="section">
+<div class="top"><h1>Clientes</h1><button class="btn primary" onclick="openModal('cliente')">+ Novo cliente</button></div>
+<div class="toolbar"><input id="searchCliente" placeholder="Pesquisar..." oninput="renderClientes()"></div>
+<div class="table-wrap"><table><thead><tr><th>Nome</th><th>Telefone</th><th>Observação</th><th></th></tr></thead><tbody id="clientesBody"></tbody></table></div>
+</section>
+
+<section id="produtos" class="section">
+<div class="top"><h1>Produtos</h1><button class="btn primary" onclick="openModal('produto')">+ Novo produto</button></div>
+<div class="table-wrap"><table><thead><tr><th>Produto</th><th>Tamanho</th><th>Preço</th><th>Estoque</th><th></th></tr></thead><tbody id="produtosBody"></tbody></table></div>
+</section>
+
+<section id="servicos" class="section">
+<div class="top"><h1>Serviços</h1><button class="btn primary" onclick="openModal('servico')">+ Novo serviço</button></div>
+<div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Serviço</th><th>Valor</th><th>Status</th><th></th></tr></thead><tbody id="servicosBody"></tbody></table></div>
+</section>
+
+<section id="caixa" class="section">
+<div class="top"><h1>Caixa do dia</h1><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn secondary" onclick="exportarCSV()">📊 Planilha</button><button class="btn secondary" onclick="exportarPDF()">📄 PDF</button><button class="btn primary" onclick="openModal('mov')">+ Lançamento</button></div></div>
+<div class="grid">
+<div class="card"><div class="muted">Entradas</div><div class="stat" id="entradas">R$ 0,00</div></div>
+<div class="card"><div class="muted">Saídas</div><div class="stat" id="saidas">R$ 0,00</div></div>
+<div class="card"><div class="muted">Saldo</div><div class="stat" id="saldo">R$ 0,00</div></div>
+<div class="card"><button class="btn secondary" onclick="fecharCaixa()">Fechar caixa</button></div>
+</div>
+<div class="table-wrap" style="margin-top:18px"><table><thead><tr><th>Tipo</th><th>Descrição</th><th>Valor</th><th></th></tr></thead><tbody id="movBody"></tbody></table></div>
+</section>
+</main>
+</div>
+
+<div id="modal" class="modal hidden" onclick="if(event.target===this)closeModal()"><div class="modal-card" id="modalContent"></div></div>
+
+<script>
+const key='sapatariaProData';
+let data=JSON.parse(localStorage.getItem(key)||'{"clientes":[],"produtos":[],"servicos":[],"movimentos":[]}');
+const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const save=()=>{localStorage.setItem(key,JSON.stringify(data));renderAll()};
+function login(){if(document.getElementById('user').value==='admin'&&document.getElementById('pass').value==='1234'){sessionStorage.ok='1';document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');renderAll()}else document.getElementById('loginError').textContent='Usuário ou senha incorretos.'}
+function logout(){sessionStorage.removeItem('ok');location.reload()}
+if(sessionStorage.ok){document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden')}
+function showPage(id){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id))}
+function openModal(type){
+let title='',body='';
+if(type==='cliente'){title='Novo cliente';body=`<div class="field"><label>Nome</label><input id="mNome"></div><div class="field"><label>Telefone</label><input id="mTel"></div><div class="field"><label>Observação</label><input id="mObs"></div>`}
+if(type==='produto'){title='Novo produto';body=`<div class="field"><label>Produto / sapato</label><input id="mNome"></div><div class="field"><label>Tamanho</label><input id="mTam"></div><div class="field"><label>Preço</label><input id="mPreco" type="number" step=".01"></div><div class="field"><label>Estoque</label><input id="mEst" type="number"></div>`}
+if(type==='servico'){title='Novo serviço';body=`<div class="field"><label>Cliente</label><select id="mCli"><option value="">Selecione</option>${data.clientes.map((c,i)=>`<option value="${i}">${c.nome}</option>`).join('')}</select></div><div class="field"><label>Serviço</label><input id="mNome" placeholder="Ex.: Conserto de solado"></div><div class="field"><label>Valor</label><input id="mPreco" type="number" step=".01"></div><div class="field"><label>Status</label><select id="mStatus"><option>Aguardando</option><option>Em andamento</option><option>Pronto</option><option>Entregue</option></select></div>`}
+if(type==='mov'){title='Lançamento de caixa';body=`<div class="field"><label>Tipo</label><select id="mTipo"><option value="entrada">Entrada</option><option value="saida">Saída</option></select></div><div class="field"><label>Descrição</label><input id="mDesc"></div><div class="field"><label>Valor</label><input id="mValor" type="number" step=".01"></div>`}
+document.getElementById('modalContent').innerHTML=`<h2>${title}</h2>${body}<div class="modal-actions"><button class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveModal('${type}')">Salvar</button></div>`;
+document.getElementById('modal').classList.remove('hidden');
+}
+function closeModal(){document.getElementById('modal').classList.add('hidden')}
+function saveModal(type){
+if(type==='cliente')data.clientes.push({nome:mNome.value,tel:mTel.value,obs:mObs.value});
+if(type==='produto')data.produtos.push({nome:mNome.value,tam:mTam.value,preco:+mPreco.value,est:+mEst.value});
+if(type==='servico')data.servicos.push({cliente:mCli.options[mCli.selectedIndex]?.text||'',nome:mNome.value,preco:+mPreco.value,status:mStatus.value});
+if(type==='mov')data.movimentos.push({tipo:mTipo.value,desc:mDesc.value,valor:+mValor.value});
+closeModal();save();
+}
+function del(arr,i){if(confirm('Excluir este registro?')){data[arr].splice(i,1);save()}}
+function renderClientes(){let q=(searchCliente.value||'').toLowerCase();clientesBody.innerHTML=data.clientes.map((x,i)=>x.nome.toLowerCase().includes(q)?`<tr><td>${x.nome}</td><td>${x.tel||'-'}</td><td>${x.obs||'-'}</td><td><button class="btn danger" onclick="del('clientes',${i})">Excluir</button></td></tr>`:'').join('')||'<tr><td colspan="4" class="empty">Nenhum cliente cadastrado.</td></tr>'}
+function renderProdutos(){produtosBody.innerHTML=data.produtos.map((x,i)=>`<tr><td>${x.nome}</td><td>${x.tam||'-'}</td><td>${brl(x.preco)}</td><td>${x.est}</td><td><button class="btn danger" onclick="del('produtos',${i})">Excluir</button></td></tr>`).join('')||'<tr><td colspan="5" class="empty">Nenhum produto cadastrado.</td></tr>'}
+function renderServicos(){servicosBody.innerHTML=data.servicos.map((x,i)=>`<tr><td>${x.cliente}</td><td>${x.nome}</td><td>${brl(x.preco)}</td><td>${x.status}</td><td><button class="btn danger" onclick="del('servicos',${i})">Excluir</button></td></tr>`).join('')||'<tr><td colspan="5" class="empty">Nenhum serviço cadastrado.</td></tr>'}
+function renderCaixa(){let e=data.movimentos.filter(x=>x.tipo==='entrada').reduce((a,x)=>a+x.valor,0),s=data.movimentos.filter(x=>x.tipo==='saida').reduce((a,x)=>a+x.valor,0);entradas.textContent=brl(e);saidas.textContent=brl(s);saldo.textContent=brl(e-s);sSaldo.textContent=brl(e-s);movBody.innerHTML=data.movimentos.map((x,i)=>`<tr><td>${x.tipo==='entrada'?'Entrada':'Saída'}</td><td>${x.desc}</td><td>${brl(x.valor)}</td><td><button class="btn danger" onclick="del('movimentos',${i})">Excluir</button></td></tr>`).join('')||'<tr><td colspan="4" class="empty">Nenhum lançamento hoje.</td></tr>'}
+function renderAll(){sClientes.textContent=data.clientes.length;sProdutos.textContent=data.produtos.length;sServicos.textContent=data.servicos.length;renderClientes();renderProdutos();renderServicos();renderCaixa()}
+function fecharCaixa(){let e=data.movimentos.filter(x=>x.tipo==='entrada').reduce((a,x)=>a+x.valor,0),s=data.movimentos.filter(x=>x.tipo==='saida').reduce((a,x)=>a+x.valor,0);alert('Fechamento do caixa\\n\\nEntradas: '+brl(e)+'\\nSaídas: '+brl(s)+'\\nSaldo: '+brl(e-s))}
+renderAll();
+</script>
+</body>
+</html>
